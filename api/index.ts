@@ -25,10 +25,30 @@ const loadFacts = async (): Promise<Fact[]> => {
   return factsCache
 }
 
+// Telegram helper
+const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
+const telegram = async (method: string, body: object) => {
+  if (!BOT_TOKEN) return { ok: false }
+  const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/${method}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  })
+  return res.json()
+}
+
+const formatFact = (fact: Fact) => {
+  let msg = `🔬 *${fact.category.replace(/_/g, " ")}*\n\n${fact.text}`
+  if (fact.source_url) msg += `\n\n[Source](${fact.source_url})`
+  return msg
+}
+
 // Create app
 const app = new Hono()
 
 app.use("*", cors())
+
+// ==================== API ROUTES ====================
 
 // Root
 app.get("/", async (c) => {
@@ -127,6 +147,133 @@ app.get("/stats", async (c) => {
   const facts = await loadFacts()
   const categories = [...new Set(facts.map((f) => f.category))].sort()
   return c.json({ totalFacts: facts.length, categories: categories.length, uniqueSources: 13 })
+})
+
+// ==================== TELEGRAM BOT ====================
+
+app.post("/bot", async (c) => {
+  const facts = await loadFacts()
+  const categories = [...new Set(facts.map((f) => f.category))].sort()
+  
+  const update = await c.req.json()
+  const message = update.message
+  if (!message?.text) return c.json({ ok: true })
+  
+  const chatId = message.chat.id
+  const text = message.text.trim()
+  
+  // /start
+  if (text === "/start") {
+    await telegram("sendMessage", {
+      chat_id: chatId,
+      text: `🔬 *Science Facts Bot*\n\nI share fascinating science facts!\n\n*Commands:*\n/random - Random fact\n/random5 - 5 random facts\n/search <query> - Search facts\n/categories - List categories\n/category <name> - Facts by category\n/stats - Statistics`,
+      parse_mode: "Markdown"
+    })
+    return c.json({ ok: true })
+  }
+  
+  // /random
+  if (text === "/random") {
+    const fact = facts[Math.floor(Math.random() * facts.length)]
+    await telegram("sendMessage", {
+      chat_id: chatId,
+      text: formatFact(fact),
+      parse_mode: "Markdown",
+      disable_web_page_preview: true
+    })
+    return c.json({ ok: true })
+  }
+  
+  // /random5
+  if (text === "/random5") {
+    const indices = new Set<number>()
+    while (indices.size < 5) indices.add(Math.floor(Math.random() * facts.length))
+    for (const idx of indices) {
+      await telegram("sendMessage", {
+        chat_id: chatId,
+        text: formatFact(facts[idx]),
+        parse_mode: "Markdown",
+        disable_web_page_preview: true
+      })
+    }
+    return c.json({ ok: true })
+  }
+  
+  // /search
+  if (text.startsWith("/search ")) {
+    const query = text.slice(8).trim()
+    if (!query) {
+      await telegram("sendMessage", { chat_id: chatId, text: "Usage: /search <query>" })
+      return c.json({ ok: true })
+    }
+    const q = query.toLowerCase()
+    const results = facts.filter((f) => f.text.toLowerCase().includes(q))
+    if (results.length === 0) {
+      await telegram("sendMessage", { chat_id: chatId, text: `No facts found for "${query}"` })
+    } else {
+      await telegram("sendMessage", { chat_id: chatId, text: `Found ${results.length} facts for "${query}":` })
+      for (const fact of results.slice(0, 3)) {
+        await telegram("sendMessage", {
+          chat_id: chatId,
+          text: formatFact(fact),
+          parse_mode: "Markdown",
+          disable_web_page_preview: true
+        })
+      }
+    }
+    return c.json({ ok: true })
+  }
+  
+  // /categories
+  if (text === "/categories") {
+    const list = categories.slice(0, 30).map((c) => c.replace(/_/g, " ")).join("\n• ")
+    await telegram("sendMessage", {
+      chat_id: chatId,
+      text: `📚 *Categories* (${categories.length} total)\n\n• ${list}\n\n_Use /category <name>_`,
+      parse_mode: "Markdown"
+    })
+    return c.json({ ok: true })
+  }
+  
+  // /category
+  if (text.startsWith("/category ")) {
+    const cat = text.slice(10).trim().toLowerCase().replace(/ /g, "_")
+    const matched = facts.filter((f) => f.category.toLowerCase() === cat)
+    if (matched.length === 0) {
+      await telegram("sendMessage", { chat_id: chatId, text: "Category not found. Use /categories" })
+    } else {
+      await telegram("sendMessage", { chat_id: chatId, text: `📂 *${cat.replace(/_/g, " ")}* (${matched.length} facts)`, parse_mode: "Markdown" })
+      for (const fact of matched.slice(0, 3)) {
+        await telegram("sendMessage", {
+          chat_id: chatId,
+          text: formatFact(fact),
+          parse_mode: "Markdown",
+          disable_web_page_preview: true
+        })
+      }
+    }
+    return c.json({ ok: true })
+  }
+  
+  // /stats
+  if (text === "/stats") {
+    await telegram("sendMessage", {
+      chat_id: chatId,
+      text: `📊 *Statistics*\n\n• Facts: ${facts.length.toLocaleString()}\n• Categories: ${categories.length}\n• Sources: 13`,
+      parse_mode: "Markdown"
+    })
+    return c.json({ ok: true })
+  }
+  
+  // Unknown or plain message → random fact
+  const fact = facts[Math.floor(Math.random() * facts.length)]
+  await telegram("sendMessage", {
+    chat_id: chatId,
+    text: formatFact(fact),
+    parse_mode: "Markdown",
+    disable_web_page_preview: true
+  })
+  return c.json({ ok: true })
 })
 
 export const runtime = "nodejs"
