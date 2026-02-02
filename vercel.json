@@ -1,6 +1,7 @@
 {
   "framework": null,
   "rewrites": [
+    { "source": "/bot", "destination": "/api/bot" },
     { "source": "/(.*)", "destination": "/api" }
   ]
 }
