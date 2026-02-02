@@ -1,6 +1,6 @@
 # 🔬 Science Facts API
 
-REST API serving 10,000+ verified science facts. Built with [Effect-TS](https://effect.website).
+REST API serving 10,000+ verified science facts. Built with [Hono](https://hono.dev).
 
 [![Dataset](https://img.shields.io/badge/🤗%20Dataset-HuggingFace-yellow)](https://huggingface.co/datasets/Royal-lobster/100001-Science-Facts)
 [![Facts](https://img.shields.io/badge/Facts-10%2C003-blue)]()
