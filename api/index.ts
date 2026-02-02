@@ -129,6 +129,8 @@ app.get("/stats", async (c) => {
   return c.json({ totalFacts: facts.length, categories: categories.length, uniqueSources: 13 })
 })
 
+export const runtime = "nodejs"
+
 export const GET = handle(app)
 export const POST = handle(app)
 export default app
