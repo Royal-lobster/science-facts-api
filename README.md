@@ -1,10 +1,11 @@
 # 🔬 Science Facts API
 
-REST API serving 10,000+ verified science facts. Built with [Hono](https://hono.dev).
+REST API + Telegram bot serving 10,000+ verified science facts. Built with [Hono](https://hono.dev).
 
 [![Dataset](https://img.shields.io/badge/🤗%20Dataset-HuggingFace-yellow)](https://huggingface.co/datasets/Royal-lobster/100001-Science-Facts)
 [![Facts](https://img.shields.io/badge/Facts-10%2C003-blue)]()
-[![Live](https://img.shields.io/badge/Live-Vercel-black)](https://science-facts-api.vercel.app)
+[![Live](https://img.shields.io/badge/API-Vercel-black)](https://science-facts-api.vercel.app)
+[![Telegram](https://img.shields.io/badge/Bot-Telegram-blue)](https://t.me/science_facts_bot)
 
 ## 🚀 Live API
 
@@ -41,6 +42,18 @@ curl https://science-facts-api.vercel.app/facts/category/physics
 # Paginate through all facts
 curl https://science-facts-api.vercel.app/facts?limit=50&offset=100
 ```
+
+## 🤖 Telegram Bot
+
+**[@science_facts_bot](https://t.me/science_facts_bot)**
+
+Commands:
+- `/random` - Get a random fact
+- `/random5` - Get 5 random facts
+- `/search <query>` - Search for facts
+- `/categories` - List all categories
+- `/category <name>` - Facts by category
+- `/stats` - Dataset statistics
 
 ## 🛠 Tech Stack
 
