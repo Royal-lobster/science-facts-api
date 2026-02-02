@@ -43,9 +43,15 @@ curl https://science-facts-api.vercel.app/api/facts?limit=50&offset=100
 
 ## 🛠 Tech Stack
 
-- **[Hono](https://hono.dev)** - Lightweight, ultrafast web framework
+- **[Effect-TS](https://effect.website)** - Type-safe functional programming
 - **[Vercel](https://vercel.com)** - Serverless deployment
 - **TypeScript** - Type safety
+
+## ✨ Features
+
+- Full **HttpApi** schema definitions with auto-generated **Swagger docs**
+- Type-safe path parameters and query parameters
+- Proper error handling with typed error responses
 
 ## 📊 Data Sources
 
