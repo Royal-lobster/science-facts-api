@@ -26,7 +26,7 @@ const loadFacts = async (): Promise<Fact[]> => {
 }
 
 // Create app
-const app = new Hono().basePath("/api")
+const app = new Hono()
 
 app.use("*", cors())
 
@@ -41,13 +41,13 @@ app.get("/", async (c) => {
     facts: facts.length,
     categories: categories.length,
     endpoints: {
-      "GET /api/facts": "Get facts (?limit, ?offset)",
-      "GET /api/facts/random": "Random fact(s) (?count)",
-      "GET /api/facts/search": "Search (?q=query)",
-      "GET /api/facts/categories": "List categories",
-      "GET /api/facts/category/:name": "By category",
-      "GET /api/facts/:id": "By ID",
-      "GET /api/stats": "Statistics"
+      "GET /facts": "Get facts (?limit, ?offset)",
+      "GET /facts/random": "Random fact(s) (?count)",
+      "GET /facts/search": "Search (?q=query)",
+      "GET /facts/categories": "List categories",
+      "GET /facts/category/:name": "By category",
+      "GET /facts/:id": "By ID",
+      "GET /stats": "Statistics"
     }
   })
 })
